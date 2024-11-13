@@ -1,0 +1,100 @@
+1
+
+# Importing necessary libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load the Salary_positions dataset (replace 'Salary_positions.csv' with your actual file)
+df = pd.read_csv('Salary_positions.csv')
+
+# Display the first few rows of the dataset
+print(df.head())
+
+# Check for null values
+print("Null values in each column:")
+print(df.isnull().sum())
+
+# Features and target variable
+X = df[['Level']]  # Employee level as the independent variable
+y = df['Salary']  # Salary as the dependent variable
+
+# Split the dataset into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a simple linear regression model
+model = LinearRegression()
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model (you can print the R^2 score and other metrics if needed)
+print(f"Model's R^2 Score: {model.score(X_test, y_test)}")
+
+# Predict salary for level 11 and level 12 employees
+level_11_salary = model.predict([[11]])
+level_12_salary = model.predict([[12]])
+
+print(f"Predicted salary for level 11 employee: {level_11_salary[0]}")
+print(f"Predicted salary for level 12 employee: {level_12_salary[0]}")
+
+# Visualizing the regression line and data points
+plt.scatter(X, y, color='blue')  # Scatter plot of data points
+plt.plot(X, model.predict(X), color='red')  # Regression line
+plt.title('Salary Prediction Based on Employee Level')
+plt.xlabel('Employee Level')
+plt.ylabel('Salary')
+plt.show()
+
+
+# Importing necessary libraries
+import pandas as pd
+from sklearn.naive_bayes import GaussianNB
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import numpy as np
+
+# Load the weather forecast dataset (replace 'weather_forecast.csv' with your actual file)
+df = pd.read_csv('weather_forecast.csv')
+
+# Display the first few rows of the dataset
+print(df.head())
+
+# Check for null values
+print("Null values in each column:")
+print(df.isnull().sum())
+
+# Preprocessing: Convert categorical data to numeric (using Label Encoding)
+df['Outlook'] = df['Outlook'].map({'Sunny': 0, 'Overcast': 1, 'Rain': 2})
+df['Temperature'] = df['Temperature'].map({'Hot': 0, 'Mild': 1, 'Cool': 2})
+df['Humidity'] = df['Humidity'].map({'High': 0, 'Low': 1})
+df['Wind'] = df['Wind'].map({'Weak': 0, 'Strong': 1})
+df['PlayTennis'] = df['PlayTennis'].map({'No': 0, 'Yes': 1})
+
+# Features and target variable
+X = df.drop('PlayTennis', axis=1)  # Features (excluding the target variable)
+y = df['PlayTennis']  # Target variable (PlayTennis)
+
+# Split the dataset into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a Naive Bayes classifier (Gaussian Naive Bayes)
+model = GaussianNB()
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+print("Accuracy Score:", accuracy_score(y_test, y_pred))
+print("Confusion Matrix:")
+print(confusion_matrix(y_test, y_pred))
+print("Classification Report:")
+print(classification_report(y_test, y_pred))

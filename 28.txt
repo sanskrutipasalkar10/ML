@@ -1,0 +1,81 @@
+1.
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report,confusion_matrix
+
+newsgroups = fetch_20newsgroups(subset='all')
+
+vectorizer = TfidfVectorizer(stop_words='english')
+X = vectorizer.fit_transform(newsgroups.data)
+y = newsgroups.target
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+random_state=42)
+
+model = MultinomialNB()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy:.4f}")
+
+print("Classification Report:\n", classification_report(y_test, y_pred,target_names=newsgroups.target_names))
+
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+news_text = ["The stock market is seeing a significant increase in pricesdue to new regulations."]
+news_text_transformed = vectorizer.transform(news_text)
+
+predicted_category = model.predict(news_text_transformed)
+predicted_category_name =newsgroups.target_names[predicted_category[0]]
+
+print(f"Predicted Category: {predicted_category_name}")
+
+2
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data  # Features: sepal length, sepal width, petal length, petal width
+y = iris.target  # Target: flower species (0, 1, 2)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# SVM with Linear Kernel
+svm_linear = SVC(kernel='linear')
+svm_linear.fit(X_train, y_train)
+y_pred_linear = svm_linear.predict(X_test)
+accuracy_linear = accuracy_score(y_test, y_pred_linear)
+print(f"Accuracy with Linear Kernel: {accuracy_linear * 100:.2f}%")
+
+# SVM with Polynomial Kernel
+svm_poly = SVC(kernel='poly', degree=3)  # Degree=3 for polynomial kernel
+svm_poly.fit(X_train, y_train)
+y_pred_poly = svm_poly.predict(X_test)
+accuracy_poly = accuracy_score(y_test, y_pred_poly)
+print(f"Accuracy with Polynomial Kernel: {accuracy_poly * 100:.2f}%")
+
+# SVM with Radial Basis Function (RBF) Kernel
+svm_rbf = SVC(kernel='rbf')
+svm_rbf.fit(X_train, y_train)
+y_pred_rbf = svm_rbf.predict(X_test)
+accuracy_rbf = accuracy_score(y_test, y_pred_rbf)
+print(f"Accuracy with RBF Kernel: {accuracy_rbf * 100:.2f}%")
+
+# Example: Predict the flower type based on input data (sepal length, sepal width, petal length, petal width)
+input_data = [[5.1, 3.5, 1.4, 0.2]]  # Example: [sepal length, sepal width, petal length, petal width]
+predicted_species_linear = svm_linear.predict(input_data)
+predicted_species_poly = svm_poly.predict(input_data)
+predicted_species_rbf = svm_rbf.predict(input_data)
+
+print(f"Predicted species with Linear Kernel: {iris.target_names[predicted_species_linear][0]}")
+print(f"Predicted species with Polynomial Kernel: {iris.target_names[predicted_species_poly][0]}")
+print(f"Predicted species with RBF Kernel: {iris.target_names[predicted_species_rbf][0]}")

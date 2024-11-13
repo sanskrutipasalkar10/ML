@@ -1,0 +1,115 @@
+1
+
+# Importing necessary libraries
+import pandas as pd
+from sklearn.datasets import load_boston
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+
+# Load the Boston Housing dataset
+boston = load_boston()
+df = pd.DataFrame(boston.data, columns=boston.feature_names)
+df['PRICE'] = boston.target
+
+# Display the first few rows of the dataset
+print(df.head())
+
+# Checking for null values
+print("Null values in each column:")
+print(df.isnull().sum())
+
+# Features and target variable
+X = df.drop('PRICE', axis=1)  # Features
+y = df['PRICE']  # Target variable (Price)
+
+# Split the dataset into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create polynomial features (degree 2 for simplicity)
+poly = PolynomialFeatures(degree=2)
+X_poly_train = poly.fit_transform(X_train)
+X_poly_test = poly.transform(X_test)
+
+# Create and train the Polynomial Linear Regression model
+model = LinearRegression()
+model.fit(X_poly_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_poly_test)
+
+# Evaluate the model
+print("Mean Squared Error:", mean_squared_error(y_test, y_pred))
+print("R^2 Score:", r2_score(y_test, y_pred))
+
+# Visualize the results (for one feature, for simplicity)
+plt.scatter(X_test['CRIM'], y_test, color='blue', label='Actual')
+plt.scatter(X_test['CRIM'], y_pred, color='red', label='Predicted')
+plt.title('Polynomial Linear Regression: Crime vs Price')
+plt.xlabel('Crime Rate (CRIM)')
+plt.ylabel('Price')
+plt.legend()
+plt.show()
+
+
+2
+
+# Importing necessary libraries
+import pandas as pd
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+
+# Load the employee dataset (replace 'employee_data.csv' with your actual file)
+df = pd.read_csv('employee_data.csv')
+
+# Display the first few rows of the dataset
+print(df.head())
+
+# Check for missing values
+print("Null values in each column:")
+print(df.isnull().sum())
+
+# Preprocess data: Drop rows with missing values
+df = df.dropna()
+
+# Assuming 'Salary' and 'Years of Experience' are the relevant features for clustering
+X = df[['Salary', 'YearsExperience']]  # Adjust the columns based on your dataset
+
+# Feature scaling (Standardization) before applying K-Means
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Use the Elbow Method to find the optimal number of clusters
+wcss = []
+for i in range(1, 11):  # Trying k values from 1 to 10
+    kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=42)
+    kmeans.fit(X_scaled)
+    wcss.append(kmeans.inertia_)
+
+# Plot the elbow graph to find the optimal number of clusters
+plt.plot(range(1, 11), wcss)
+plt.title('Elbow Method for Optimal K')
+plt.xlabel('Number of Clusters')
+plt.ylabel('WCSS (Within-cluster sum of squares)')
+plt.show()
+
+# Applying K-Means with the optimal number of clusters (assume 3 clusters here)
+kmeans = KMeans(n_clusters=3, init='k-means++', max_iter=300, n_init=10, random_state=42)
+y_kmeans = kmeans.fit_predict(X_scaled)
+
+# Add the cluster labels to the original dataframe
+df['Cluster'] = y_kmeans
+
+# Visualize the clusters
+plt.scatter(X['Salary'], X['YearsExperience'], c=y_kmeans, cmap='viridis')
+plt.title('K-Means Clustering: Employee Income Groups')
+plt.xlabel('Salary')
+plt.ylabel('Years of Experience')
+plt.show()
+
+# Display the cluster centers
+print("Cluster Centers:")
+print(kmeans.cluster_centers_)

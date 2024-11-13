@@ -1,0 +1,71 @@
+1.
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+
+# Load the dataset (replace with actual house price dataset)
+# For example, the dataset might have features like 'Area', 'Bedrooms', 'Age', etc.
+df = pd.read_csv('house_price.csv')
+
+# Assume the dataset has the following columns:
+# 'Area', 'Bedrooms', 'Age', 'Price'
+
+# Select the features (X) and target (y)
+X = df[['Area', 'Bedrooms', 'Age']]  # Independent variables
+y = df['Price']  # Dependent variable (Price)
+
+# Split the data into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train the Multiple Linear Regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Make predictions on the test data
+y_pred = model.predict(X_test)
+
+# Evaluate the model using Mean Squared Error
+mse = mean_squared_error(y_test, y_pred)
+print(f"Mean Squared Error (MSE) for Multiple Linear Regression: {mse:.2f}")
+
+# Predict prices of houses (for example, given the area, bedrooms, and age)
+example_data = pd.DataFrame({'Area': [2000, 1500], 'Bedrooms': [3, 2], 'Age': [10, 5]})
+predicted_prices = model.predict(example_data)
+print(f"Predicted Prices for given houses: {predicted_prices}")
+
+
+2
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+
+# Load the dataset (UniversalBank.csv)
+df = pd.read_csv('UniversalBank.csv')
+
+# Assume the dataset has features such as 'Age', 'Income', 'CreditScore', 'Education', etc.
+# and the target variable 'PersonalLoan' (1 = yes, 0 = no)
+
+# Select features and target
+X = df[['Age', 'Income', 'CreditScore', 'Family', 'Education', 'CCAvg', 'Mortgage', 'LoanAmount']]  # Independent variables
+y = df['PersonalLoan']  # Target variable (whether the person took a loan)
+
+# Preprocess data (e.g., normalize the features)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Split the data into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Create and train the Linear SVM model
+svm_model = SVC(kernel='linear')  # Using linear kernel
+svm_model.fit(X_train, y_train)
+
+# Make predictions on the test data
+y_pred = svm_model.predict(X_test)
+
+# Evaluate the model using accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy of Linear SVM model: {accuracy * 100:.2f}%")

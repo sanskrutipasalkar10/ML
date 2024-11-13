@@ -1,0 +1,98 @@
+1.
+import numpy as np
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
+# Load the dataset (You can use any dataset for binary classification, here we use a random dataset)
+# For illustration purposes, let's generate a synthetic binary classification dataset
+from sklearn.datasets import make_classification
+
+# Generate a random binary classification dataset (1000 samples, 20 features)
+X, y = make_classification(n_samples=1000, n_features=20, n_classes=2, random_state=42)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Normalize the feature data
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Create a Sequential model for the neural network
+model = Sequential()
+
+# Add the first hidden layer with ReLU activation
+model.add(Dense(units=64, activation='relu', input_dim=X_train_scaled.shape[1]))
+
+# Add the output layer with Sigmoid activation (binary classification)
+model.add(Dense(units=1, activation='sigmoid'))
+
+# Compile the model using Adam optimizer and binary cross-entropy loss function
+model.compile(optimizer=Adam(), loss='binary_crossentropy', metrics=['accuracy'])
+
+# Train the model
+model.fit(X_train_scaled, y_train, epochs=50, batch_size=32, validation_data=(X_test_scaled, y_test))
+
+# Evaluate the model on the test data
+loss, accuracy = model.evaluate(X_test_scaled, y_test)
+print(f"Test Accuracy: {accuracy * 100:.2f}%")
+
+# Predict using the trained model
+predictions = model.predict(X_test_scaled)
+print(f"Predictions for the first 5 test samples: {predictions[:5]}")
+
+
+2.
+
+import pandas as pd
+import numpy as np
+from sklearn.datasets import load_boston
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+import matplotlib.pyplot as plt
+
+# Load the Boston housing dataset
+boston = load_boston()
+
+# Convert it to a pandas DataFrame
+df = pd.DataFrame(boston.data, columns=boston.feature_names)
+df['Price'] = boston.target  # Adding the target variable 'Price'
+
+# Use only one feature 'RM' (average number of rooms)
+X = df[['RM']]  # Feature
+y = df['Price']  # Target variable
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a Simple Linear Regression model
+model = LinearRegression()
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Predict the house prices on the test set
+y_pred = model.predict(X_test)
+
+# Calculate the Mean Squared Error (MSE) to evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+print(f"Mean Squared Error: {mse:.2f}")
+
+# Plot the regression line along with the data points
+plt.scatter(X_test, y_test, color='blue', label='Actual Prices')
+plt.plot(X_test, y_pred, color='red', label='Regression Line')
+plt.xlabel('Number of Rooms (RM)')
+plt.ylabel('Price')
+plt.title('Simple Linear Regression (RM vs Price)')
+plt.legend()
+plt.show()
+
+# Predict the price for a house with a given number of rooms
+room_count = 6  # Example: house with 6 rooms
+predicted_price = model.predict([[room_count]])
+print(f"Predicted Price for a house with {room_count} rooms: ${predicted_price[0]:.2f}")

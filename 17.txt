@@ -1,0 +1,101 @@
+1.
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, VotingClassifier, StackingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.datasets import load_diabetes
+
+# Load the Pima Indians Diabetes Database (replace with your own CSV if needed)
+url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/pima-indians-diabetes.data.csv"
+column_names = ['Pregnancies', 'Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI', 'DiabetesPedigreeFunction', 'Age', 'Outcome']
+data = pd.read_csv(url, names=column_names)
+
+# Split the data into features (X) and target variable (y)
+X = data.drop(columns='Outcome')
+y = data['Outcome']
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# --- 1. Bagging (Random Forest) ---
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train_scaled, y_train)
+rf_pred = rf.predict(X_test_scaled)
+rf_accuracy = accuracy_score(y_test, rf_pred)
+
+# --- 2. Boosting (Gradient Boosting) ---
+gb = GradientBoostingClassifier(n_estimators=100, random_state=42)
+gb.fit(X_train_scaled, y_train)
+gb_pred = gb.predict(X_test_scaled)
+gb_accuracy = accuracy_score(y_test, gb_pred)
+
+# --- 3. Voting Classifier ---
+voting_clf = VotingClassifier(estimators=[
+    ('rf', rf), ('gb', gb), ('lr', LogisticRegression(solver='liblinear', random_state=42))], voting='hard')
+voting_clf.fit(X_train_scaled, y_train)
+voting_pred = voting_clf.predict(X_test_scaled)
+voting_accuracy = accuracy_score(y_test, voting_pred)
+
+# --- 4. Stacking Classifier ---
+stacking_clf = StackingClassifier(estimators=[
+    ('rf', rf), ('gb', gb), ('lr', LogisticRegression(solver='liblinear', random_state=42))],
+    final_estimator=LogisticRegression())
+stacking_clf.fit(X_train_scaled, y_train)
+stacking_pred = stacking_clf.predict(X_test_scaled)
+stacking_accuracy = accuracy_score(y_test, stacking_pred)
+
+# --- Print Results ---
+print(f"Random Forest Accuracy (Bagging): {rf_accuracy * 100:.2f}%")
+print(f"Gradient Boosting Accuracy: {gb_accuracy * 100:.2f}%")
+print(f"Voting Classifier Accuracy: {voting_accuracy * 100:.2f}%")
+print(f"Stacking Classifier Accuracy: {stacking_accuracy * 100:.2f}%")
+
+
+2
+
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.datasets import load_boston
+
+# Load the Boston Housing dataset
+boston = load_boston()
+X = pd.DataFrame(boston.data, columns=boston.feature_names)
+y = boston.target
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create a Multiple Linear Regression model
+model = LinearRegression()
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Predict the house prices on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# Print the results
+print(f"Mean Squared Error: {mse:.2f}")
+print(f"R-squared: {r2:.2f}")
+
+# Predict the house price for a new sample (using sample feature values)
+new_sample = np.array([[0.1, 0, 6.5, 70, 0, 7.5, 4, 0, 1, 240, 17, 396, 5]])  # Example sample
+predicted_price = model.predict(new_sample)
+print(f"Predicted House Price for the new sample: ${predicted_price[0]:.2f}")

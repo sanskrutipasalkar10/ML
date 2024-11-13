@@ -1,0 +1,67 @@
+1
+
+# Import necessary libraries
+import pandas as pd
+from sklearn.decomposition import PCA
+from sklearn.datasets import load_iris
+import matplotlib.pyplot as plt
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data  # Features (sepal length, sepal width, petal length, petal width)
+y = iris.target  # Target (species)
+
+# Perform PCA to reduce to 2 dimensions
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+
+# Create a DataFrame with the reduced data
+pca_df = pd.DataFrame(X_pca, columns=['Principal Component 1', 'Principal Component 2'])
+pca_df['Species'] = iris.target_names[y]
+
+# Print the explained variance ratio (percentage of variance explained by each component)
+print(f"Explained variance ratio: {pca.explained_variance_ratio_}")
+
+# Scatter plot of the first two principal components
+plt.figure(figsize=(8, 6))
+plt.scatter(pca_df['Principal Component 1'], pca_df['Principal Component 2'], c=y, cmap='viridis', edgecolor='k')
+plt.title('PCA of Iris Dataset')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.colorbar(label='Species')
+plt.show()
+
+
+
+2.
+
+# Import necessary libraries
+import pandas as pd
+from sklearn.datasets import load_iris
+import matplotlib.pyplot as plt
+
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data  # Features (sepal length, sepal width, petal length, petal width)
+y = iris.target  # Target (species)
+
+# Convert categorical target values into numeric (this is already numeric in the iris dataset, but we'll show the process)
+# Iris target names are ['setosa', 'versicolor', 'virginica']
+species_map = {0: 'setosa', 1: 'versicolor', 2: 'virginica'}
+y_numeric = [species_map[label] for label in y]
+
+# Create a DataFrame with the features and target variable
+df = pd.DataFrame(X, columns=iris.feature_names)
+df['Species'] = pd.Series(y_numeric)
+
+# Scatter plot of Petal Length vs. Petal Width with color mapping to species
+plt.figure(figsize=(8, 6))
+for species in ['setosa', 'versicolor', 'virginica']:
+    subset = df[df['Species'] == species]
+    plt.scatter(subset['petal length (cm)'], subset['petal width (cm)'], label=species)
+
+plt.title('Petal Length vs. Petal Width')
+plt.xlabel('Petal Length (cm)')
+plt.ylabel('Petal Width (cm)')
+plt.legend()
+plt.show()

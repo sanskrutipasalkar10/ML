@@ -1,0 +1,90 @@
+1.
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+df = pd.read_csv('C:\\Users\\sanskruti\\OneDrive\\Desktop\\symsc prac\\SEM 3 ML\\HousePriceData.csv')
+
+# Display the number of null values in each column
+print("Null values in each column before removing:")
+print(df.isnull().sum())
+
+# Remove rows with null values
+df = df.dropna()
+
+# Display the number of null values after removing
+print("Null values in each column after removing:")
+print(df.isnull().sum())
+
+X = df[['FloorArea', 'BedRooms', 'Price']] # Features
+y = df['Price'] # Target variable
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+mse = mean_squared_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+print("Mean Squared Error:", mse)
+print("R2 Score:", r2)
+
+predicted_prices = model.predict(X_test)
+
+print("Predicted Prices:", predicted_prices)
+print("Actual Prices:", y_test.values)
+
+
+2.
+
+
+# Import necessary libraries
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import AgglomerativeClustering
+import matplotlib.pyplot as plt
+import scipy.cluster.hierarchy as sch
+
+# Load the dataset (replace 'wholesale_customers.csv' with your file)
+df = pd.read_csv('wholesale_customers.csv')
+
+# Display the dataset's columns to check structure
+print("Dataset Columns:", df.columns)
+
+# Select relevant columns for clustering (e.g., 'Region', 'Channel', 'Fresh', 'Milk', etc.)
+# Replace 'Region' with the appropriate numerical column
+X = df[['Region', 'Fresh', 'Milk', 'Grocery', 'Frozen', 'Detergents_Paper', 'Delicassen']]
+
+# Standardize the data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Use dendrogram to find the optimal number of clusters
+plt.figure(figsize=(10, 7))
+dendrogram = sch.dendrogram(sch.linkage(X_scaled, method='ward'))
+plt.title('Dendrogram')
+plt.xlabel('Clients')
+plt.ylabel('Euclidean distances')
+plt.show()
+
+# Fit Agglomerative Clustering
+model = AgglomerativeClustering(n_clusters=3, affinity='euclidean', linkage='ward')
+labels = model.fit_predict(X_scaled)
+
+# Add cluster labels to the dataset
+df['Cluster'] = labels
+
+# Display a sample of the clustered dataset
+print(df.head())
+
+# Plot the clusters (optional visualization, use columns of interest)
+plt.scatter(X_scaled[:, 0], X_scaled[:, 1], c=labels, cmap='rainbow')
+plt.title('Agglomerative Clustering of Clients')
+plt.xlabel('Feature 1')
+plt.ylabel('Feature 2')
+plt.show()

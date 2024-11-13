@@ -1,0 +1,92 @@
+1.
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import cross_val_score
+import matplotlib.pyplot as plt
+
+# Load the diabetes dataset (Assume it is in CSV format)
+df = pd.read_csv('diabetes.csv')  # Replace with your dataset path
+print(df.head())
+
+# Split data into features (X) and target variable (y)
+X = df.drop('Outcome', axis=1)  # All columns except 'Outcome' (diabetic status)
+y = df['Outcome']  # 'Outcome' column (1 for diabetic, 0 for not diabetic)
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Function to find optimal value of K using cross-validation
+def find_optimal_k(X_train, y_train):
+    k_range = range(1, 21)  # Testing k values from 1 to 20
+    cv_scores = []
+    for k in k_range:
+        knn = KNeighborsClassifier(n_neighbors=k)
+        scores = cross_val_score(knn, X_train, y_train, cv=5, scoring='accuracy')
+        cv_scores.append(scores.mean())
+    
+    # Plotting the results to find the best k
+    plt.plot(k_range, cv_scores, color='blue', marker='o', linestyle='dashed')
+    plt.title('Cross-validation Accuracy for Different K values')
+    plt.xlabel('K value')
+    plt.ylabel('Accuracy')
+    plt.show()
+
+    optimal_k = k_range[cv_scores.index(max(cv_scores))]
+    print(f"The optimal value of K is {optimal_k}")
+    return optimal_k
+
+# Find the optimal K
+optimal_k = find_optimal_k(X_train, y_train)
+
+# Train the KNN model with optimal K
+knn = KNeighborsClassifier(n_neighbors=optimal_k)
+knn.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = knn.predict(X_test)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy of the KNN model: {accuracy:.2f}")
+
+# Predict for a new patient (example: patient with [pregnancies=2, glucose=80, bp=75, skin=25, ins=120, bmi=33, dpf=0.1, age=45])
+new_patient = scaler.transform([[2, 80, 75, 25, 120, 33, 0.1, 45]])  # Example input features for a new patient
+prediction = knn.predict(new_patient)
+print(f"Prediction for new patient: {'Diabetic' if prediction == 1 else 'Not Diabetic'}")
+
+
+2.
+
+import pandas as pd
+from mlxtend.frequent_patterns import apriori, association_rules
+
+# Load the groceries dataset (Assume it's in CSV format with transactions in rows)
+df = pd.read_csv('groceries.csv', header=None)  # Replace with your dataset path
+
+# Convert the dataset into one-hot encoded format
+# Each column will represent an item, and 1 means the item was bought in the transaction
+df_encoded = pd.get_dummies(df.stack(), prefix='item').sum(level=0)
+
+# Apply Apriori algorithm with minimum support of 0.25
+frequent_itemsets = apriori(df_encoded, min_support=0.25, use_colnames=True)
+
+# Generate the association rules
+rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1)
+
+# Display the top rules
+print("Association Rules:")
+print(rules)
+
+# Optionally, filter rules for interestingness, e.g., rules with high confidence
+high_confidence_rules = rules[rules['confidence'] > 0.7]
+print("\nHigh Confidence Rules:")
+print(high_confidence_rules)

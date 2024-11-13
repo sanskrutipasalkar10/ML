@@ -1,0 +1,78 @@
+1
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+from sklearn.metrics import accuracy_score,classification_report,confusion_matrix
+from sklearn import tree
+
+import matplotlib.pyplot as plt
+
+url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00267/data_banknote_authentication.txt"
+
+column_names = ['Variance', 'Skewness', 'Curtosis', 'Entropy', 'Class']
+df = pd.read_csv(url, header=None, names=column_names)
+
+X = df.drop('Class', axis=1).values # Features
+y = df['Class'].values # Target (0 for forged, 1 for genuine)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42)
+
+dt_classifier = DecisionTreeClassifier(random_state=42) 
+dt_classifier.fit(X_train, y_train) 
+
+y_pred = dt_classifier.predict(X_test)
+# Calculate accuracy 
+accuracy = accuracy_score(y_test, y_pred) 
+print(f"Accuracy: {accuracy:.4f}") 
+
+print("Classification Report:\n", classification_report(y_test, y_pred)) 
+
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+plt.figure(figsize=(20,10)) 
+tree.plot_tree(dt_classifier, feature_names=column_names[:-1],  class_names=['Forged', 'Genuine'], filled=True) 
+plt.show()
+
+2
+
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelEncoder
+
+# Load the UniversalBank dataset
+df = pd.read_csv('UniversalBank.csv')
+
+# Check for null values
+print("Null Values in the Dataset:")
+print(df.isnull().sum())
+
+# Preprocessing: Drop irrelevant columns and handle categorical data
+df = df.drop(['ID', 'ZIP Code'], axis=1)  # Drop columns not useful for prediction
+df['Education'] = df['Education'].map({'High School': 0, 'Undergraduate': 1, 'Graduate': 2})  # Encode Education column
+
+# Features and target variable
+X = df.drop('PersonalLoan', axis=1)  # Drop the target variable
+y = df['PersonalLoan']  # Target variable (PersonalLoan: 0=no, 1=yes)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Standardize the data
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Train the Linear SVM model
+svm_classifier = SVC(kernel='linear', random_state=42)
+svm_classifier.fit(X_train_scaled, y_train)
+
+# Make predictions on the test set
+y_pred = svm_classifier.predict(X_test_scaled)
+
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy of the Linear SVM model: {accuracy * 100:.2f}%")

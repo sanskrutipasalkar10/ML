@@ -1,0 +1,91 @@
+1
+
+
+
+from sklearn.datasets import fetch_20newsgroups
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report,confusion_matrix
+
+newsgroups = fetch_20newsgroups(subset='all')
+
+vectorizer = TfidfVectorizer(stop_words='english')
+X = vectorizer.fit_transform(newsgroups.data)
+y = newsgroups.target
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,
+random_state=42)
+
+model = MultinomialNB()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy:.4f}")
+
+print("Classification Report:\n", classification_report(y_test, y_pred,target_names=newsgroups.target_names))
+
+print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+news_text = ["The stock market is seeing a significant increase in pricesdue to new regulations."]
+news_text_transformed = vectorizer.transform(news_text)
+
+predicted_category = model.predict(news_text_transformed)
+predicted_category_name =newsgroups.target_names[predicted_category[0]]
+
+print(f"Predicted Category: {predicted_category_name}")
+
+2
+
+
+# Importing necessary libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, classification_report
+
+# Sample dataset: Weather data for tennis (replace with actual dataset if needed)
+data = {
+    'Outlook': ['Sunny', 'Sunny', 'Overcast', 'Rain', 'Rain', 'Rain', 'Overcast', 'Sunny', 'Sunny', 'Rain', 'Sunny', 'Overcast', 'Overcast', 'Rain'],
+    'Temperature': ['Hot', 'Hot', 'Hot', 'Mild', 'Cool', 'Cool', 'Mild', 'Mild', 'Cool', 'Mild', 'Mild', 'Mild', 'Hot', 'Mild'],
+    'Humidity': ['High', 'High', 'High', 'High', 'High', 'Low', 'Low', 'High', 'Low', 'Low', 'Low', 'Low', 'High', 'High'],
+    'Wind': ['Weak', 'Strong', 'Weak', 'Weak', 'Weak', 'Weak', 'Strong', 'Weak', 'Weak', 'Strong', 'Strong', 'Weak', 'Strong', 'Weak'],
+    'PlayTennis': ['No', 'No', 'Yes', 'Yes', 'Yes', 'No', 'Yes', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'No']
+}
+
+# Converting to DataFrame
+df = pd.DataFrame(data)
+
+# Convert categorical data into numeric using Label Encoding
+df['Outlook'] = df['Outlook'].map({'Sunny': 0, 'Overcast': 1, 'Rain': 2})
+df['Temperature'] = df['Temperature'].map({'Hot': 0, 'Mild': 1, 'Cool': 2})
+df['Humidity'] = df['Humidity'].map({'High': 0, 'Low': 1})
+df['Wind'] = df['Wind'].map({'Weak': 0, 'Strong': 1})
+df['PlayTennis'] = df['PlayTennis'].map({'No': 0, 'Yes': 1})
+
+# Features and target variable
+X = df.drop('PlayTennis', axis=1)  # Features (excluding the target variable)
+y = df['PlayTennis']  # Target variable (PlayTennis)
+
+# Split the dataset into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Create and train the Decision Tree classifier
+model = DecisionTreeClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Evaluate the model
+print("Accuracy Score:", accuracy_score(y_test, y_pred))
+print("Classification Report:")
+print(classification_report(y_test, y_pred))
+
+# Visualize the decision tree
+plt.figure(figsize=(10, 8))
+plot_tree(model, filled=True, feature_names=X.columns, class_names=['No', 'Yes'], rounded=True)
+plt.show()

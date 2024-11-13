@@ -1,0 +1,102 @@
+1.
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Ridge, Lasso
+from sklearn.metrics import mean_squared_error
+
+# Load the Boston housing dataset
+from sklearn.datasets import load_boston
+boston = load_boston()
+
+# Create DataFrame
+df = pd.DataFrame(boston.data, columns=boston.feature_names)
+
+# Add the target variable 'Price' (house price)
+df['Price'] = boston.target
+
+# Select only 'RM' (average number of rooms) and 'Price' columns
+df = df[['RM', 'Price']]
+
+# Define feature matrix X (RM) and target variable y (Price)
+X = df[['RM']].values
+y = df['Price'].values
+
+# Split the data into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 1. Ridge Regression Model
+ridge_model = Ridge(alpha=1.0)  # Alpha is the regularization strength
+ridge_model.fit(X_train, y_train)
+
+# Predict house price with Ridge Regression
+y_pred_ridge = ridge_model.predict(X_test)
+
+# 2. Lasso Regression Model
+lasso_model = Lasso(alpha=0.1)  # Alpha is the regularization strength
+lasso_model.fit(X_train, y_train)
+
+# Predict house price with Lasso Regression
+y_pred_lasso = lasso_model.predict(X_test)
+
+# Calculate Mean Squared Error (MSE) for both models
+mse_ridge = mean_squared_error(y_test, y_pred_ridge)
+mse_lasso = mean_squared_error(y_test, y_pred_lasso)
+
+# Predict the price for a house with 5 rooms
+rooms_5 = np.array([[5]])
+
+price_ridge_5 = ridge_model.predict(rooms_5)
+price_lasso_5 = lasso_model.predict(rooms_5)
+
+# Print results
+print(f"Ridge Regression MSE: {mse_ridge:.2f}")
+print(f"Lasso Regression MSE: {mse_lasso:.2f}")
+print(f"Predicted price (Ridge) for a house with 5 rooms: ${price_ridge_5[0]:,.2f}")
+print(f"Predicted price (Lasso) for a house with 5 rooms: ${price_lasso_5[0]:,.2f}")
+
+
+2
+
+import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score
+
+# Sample weather dataset (replace this with your actual dataset)
+data = {
+    'Outlook': ['Sunny', 'Sunny', 'Overcast', 'Rainy', 'Rainy', 'Rainy', 'Overcast', 'Sunny', 'Sunny', 'Rainy'],
+    'Temperature': ['Hot', 'Hot', 'Hot', 'Mild', 'Cool', 'Cool', 'Mild', 'Mild', 'Cool', 'Mild'],
+    'Humidity': ['High', 'High', 'High', 'High', 'Low', 'Low', 'Low', 'High', 'Low', 'Low'],
+    'Wind': ['Weak', 'Strong', 'Weak', 'Weak', 'Weak', 'Strong', 'Strong', 'Weak', 'Strong', 'Weak'],
+    'PlayTennis': ['No', 'No', 'Yes', 'Yes', 'Yes', 'No', 'Yes', 'No', 'Yes', 'Yes']
+}
+
+df = pd.DataFrame(data)
+
+# Convert categorical data into numerical values using LabelEncoder
+label_encoder = LabelEncoder()
+df['Outlook'] = label_encoder.fit_transform(df['Outlook'])
+df['Temperature'] = label_encoder.fit_transform(df['Temperature'])
+df['Humidity'] = label_encoder.fit_transform(df['Humidity'])
+df['Wind'] = label_encoder.fit_transform(df['Wind'])
+df['PlayTennis'] = label_encoder.fit_transform(df['PlayTennis'])
+
+# Prepare feature matrix X and target variable y
+X = df.drop('PlayTennis', axis=1)
+y = df['PlayTennis']
+
+# Split the data into training and testing sets (80% training, 20% testing)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train the Decision Tree classifier
+dt_classifier = DecisionTreeClassifier(random_state=42)
+dt_classifier.fit(X_train, y_train)
+
+# Predict on the test set
+y_pred = dt_classifier.predict(X_test)
+
+# Evaluate the model using accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy of Decision Tree model: {accuracy * 100:.2f}%")

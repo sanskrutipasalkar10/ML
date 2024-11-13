@@ -1,0 +1,121 @@
+1
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.metrics import mean_squared_error
+
+# Load the House Price dataset
+# Assuming the dataset has 'SquareFeet' (independent variable) and 'Price' (dependent variable)
+df = pd.read_csv('house_price_dataset.csv')  # Replace with your dataset path
+
+# Check the dataset structure
+print(df.head())
+
+# Select the features (X) and target variable (y)
+X = df[['SquareFeet']].values  # Independent variable (e.g., SquareFeet)
+y = df['Price'].values  # Dependent variable (Price)
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Polynomial feature transformation
+poly = PolynomialFeatures(degree=4)  # Adjust degree based on your data
+X_poly_train = poly.fit_transform(X_train)
+X_poly_test = poly.transform(X_test)
+
+# Train a linear regression model on the transformed polynomial features
+lin_reg = LinearRegression()
+lin_reg.fit(X_poly_train, y_train)
+
+# Make predictions
+y_pred_train = lin_reg.predict(X_poly_train)
+y_pred_test = lin_reg.predict(X_poly_test)
+
+# Evaluate the model
+train_mse = mean_squared_error(y_train, y_pred_train)
+test_mse = mean_squared_error(y_test, y_pred_test)
+
+print(f"Training Mean Squared Error: {train_mse:.2f}")
+print(f"Testing Mean Squared Error: {test_mse:.2f}")
+
+# Visualize the Polynomial Regression results
+plt.scatter(X, y, color='blue')  # Scatter plot for the original data
+plt.plot(X, lin_reg.predict(poly.fit_transform(X)), color='red')  # Polynomial regression curve
+plt.title('Polynomial Regression (Degree 4) for House Prices')
+plt.xlabel('Square Feet')
+plt.ylabel('Price')
+plt.show()
+
+
+2.
+
+import numpy as np
+
+# Sigmoid activation function and its derivative
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
+# ReLU activation function and its derivative
+def relu(x):
+    return np.maximum(0, x)
+
+def relu_derivative(x):
+    return np.where(x > 0, 1, 0)
+
+# Define a simple two-layer neural network with ReLU and Sigmoid
+class TwoLayerNN:
+    def __init__(self, input_size, hidden_size, output_size):
+        # Initialize weights and biases
+        self.weights1 = np.random.randn(input_size, hidden_size)  # Weights for the input to hidden layer
+        self.bias1 = np.zeros((1, hidden_size))  # Bias for the hidden layer
+        
+        self.weights2 = np.random.randn(hidden_size, output_size)  # Weights for the hidden to output layer
+        self.bias2 = np.zeros((1, output_size))  # Bias for the output layer
+    
+    def forward(self, X):
+        # Forward pass through the network
+        self.hidden_input = np.dot(X, self.weights1) + self.bias1
+        self.hidden_output = relu(self.hidden_input)  # ReLU activation
+        
+        self.output_input = np.dot(self.hidden_output, self.weights2) + self.bias2
+        self.output = sigmoid(self.output_input)  # Sigmoid activation
+        
+        return self.output
+
+# Sample data: 4 input features for a simple binary classification task
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])  # Sample input (AND gate)
+y = np.array([[0], [0], [0], [1]])  # Output (AND gate result)
+
+# Initialize the neural network
+input_size = 2  # Number of features (inputs)
+hidden_size = 4  # Number of neurons in the hidden layer
+output_size = 1  # Output layer (binary classification)
+
+nn = TwoLayerNN(input_size, hidden_size, output_size)
+
+# Train the neural network
+epochs = 10000
+learning_rate = 0.01
+
+for epoch in range(epochs):
+    # Forward pass
+    output = nn.forward(X)
+    
+    # Compute loss (mean squared error)
+    loss = np.mean((y - output) ** 2)
+    
+    # Print loss every 1000 epochs
+    if epoch % 1000 == 0:
+        print(f"Epoch {epoch} Loss: {loss:.4f}")
+
+# After training, print final predictions
+print("\nPredictions after training:")
+predictions = nn.forward(X)
+print(predictions)
